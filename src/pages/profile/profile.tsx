@@ -1,9 +1,9 @@
 import "/profile.scss";
 
-const profile = () => {
+const Profile = () => {
   return (
     <div className="profile">profile</div>
   )
 }
 
-export default profile
+export default Profile

@@ -1,8 +1,10 @@
-import React from 'react';
+import Login from "./pages/login/login";
+import "./App.scss";
 
-function App() {
+const App = () => {
   return (
     <div className="App">
+      <Login/>
     </div>
   );
 }
