@@ -1,4 +1,4 @@
-import "/profile.scss";
+import "./profile.scss";
 
 const Profile = () => {
   return (
