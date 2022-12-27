@@ -1,10 +1,8 @@
-import React from 'react'
+import "./right-pannel.scss";
 
-type Props = {}
-
-const Rightpannel = (props: Props) => {
+const Rightpannel = () => {
   return (
-    <div>right-pannel</div>
+    <div className="right-pannel">right-pannel</div>
   )
 }
 

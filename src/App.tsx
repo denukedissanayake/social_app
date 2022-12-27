@@ -21,7 +21,9 @@ const Layout = () => {
       <Navbar/>
       <div style={{display: "flex"}}>
         <Leftpannel/>
-        <Outlet/>
+        <div style={{flex:5}}>
+          <Outlet/>
+        </div>
         <Rightpannel/>
       </div>
     </div>
@@ -41,7 +43,7 @@ const router = createBrowserRouter([
     path: "/",
     element: (    
       <ProtectedRoutes>
-        <Layout/>,
+        <Layout/>
       </ProtectedRoutes>
     ),
     children: [
