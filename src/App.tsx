@@ -9,6 +9,7 @@ import "./App.scss";
 import Leftpannel from "./components/left-pannel/left-pannel";
 import Navbar from "./components/navbar/navbar";
 import Rightpannel from "./components/right-pannel/right-pannel";
+import { AuthContext } from "./context/AuthContext";
 import { DarkModeContext } from "./context/DarkmodeContext";
 import Home from "./pages/home/home";
 import Login from "./pages/login/login";
@@ -17,10 +18,8 @@ import Signup from "./pages/signup/signup";
 
 const App = () => {
 
-  const isLoggedIn = true;
   const {darkmode} = useContext(DarkModeContext);
-  
-  console.log(darkmode);
+  const {currentUser} = useContext(AuthContext);
   
   const Layout = () => {
     return (
@@ -38,7 +37,7 @@ const App = () => {
   }
   
   const ProtectedRoutes = ({children} : any) => {
-    if(!isLoggedIn){
+    if(!currentUser?.id){
       return <Navigate to="/login"/>;
     }
   
