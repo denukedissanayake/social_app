@@ -9,7 +9,7 @@ import "./App.scss";
 import Leftpannel from "./components/left-pannel/left-pannel";
 import Navbar from "./components/navbar/navbar";
 import Rightpannel from "./components/right-pannel/right-pannel";
-import { DarkModeContext } from "./context/darkmodeContext";
+import { DarkModeContext } from "./context/DarkmodeContext";
 import Home from "./pages/home/home";
 import Login from "./pages/login/login";
 import Profile from "./pages/profile/profile";

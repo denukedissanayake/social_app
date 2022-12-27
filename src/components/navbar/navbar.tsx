@@ -9,7 +9,7 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import "./navbar.scss";
 import { useContext } from 'react';
-import { DarkModeContext } from '../../context/darkmodeContext';
+import { DarkModeContext } from '../../context/DarkmodeContext';
 
 const Navbar = () => {
 
