@@ -4,12 +4,6 @@ import "./story.scss";
 
 const Story = () => {
 
-  type storyType ={
-    id: string,
-    name: string,
-    image: string
-  }
-
   const strories = [
     {
       id : '1',
@@ -33,6 +27,12 @@ const Story = () => {
     },
   ];
 
+  // type storyType ={
+  //   id: string,
+  //   name: string,
+  //   image: string
+  // }
+
   const {currentUser} = useContext(AuthContext);
 
   return (
@@ -42,8 +42,8 @@ const Story = () => {
           <span>{currentUser?.name}</span>
           <button>+</button>
         </div>
-      {strories?.map((story: storyType) => (
-        <div className="story" id={story?.id}>
+      {strories?.map((story) => (
+        <div className="story" key={story?.id}>
           <img src={story?.image}/>
           <span>{story?.name}</span>
         </div>
