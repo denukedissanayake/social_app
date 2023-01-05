@@ -1,18 +1,45 @@
+import axios from "axios";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./signup.scss";
+import { BASEURL } from "../../utils/urls";
 
 const Signup = () => {
+
+  const [inputs, setInputs] = useState({
+    username: undefined,
+    email: undefined,
+    name: undefined,
+    password: undefined,
+  });
+  const [error, setError] = useState(undefined);
+
+  const inputChangeHandler = (e : React.ChangeEvent<HTMLInputElement>) => {
+    setInputs(prev => ({...prev, [e.target.name]: e.target.value}))
+  }
+
+  const signup =  async (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+
+    try{
+      await axios.post(`${BASEURL}/auth/register`, inputs);
+    } catch(err : any) {
+      setError(err.response.data);
+    }
+  }
+
   return (
     <div className="signup">
       <div className="card">
         <div className="left">
           <h1>Register Now</h1>
           <form>
-            <input type="text" placeholder="Name"/>
-            <input type="text" placeholder="Username"/>
-            <input type="email" placeholder="Email"/>
-            <input type="password" placeholder="Password"/>
-            <button>Signup</button>
+            <input type="text" placeholder="Name" name="name" onChange={inputChangeHandler}/>
+            <input type="text" placeholder="Username" name="username" onChange={inputChangeHandler}/>
+            <input type="email" placeholder="Email" name="email" onChange={inputChangeHandler}/>
+            <input type="password" placeholder="Password" name="password" onChange={inputChangeHandler}/>
+            {error && <span>{error}</span>}
+            <button  onClick={signup}>Signup</button>
           </form>
         </div>
         <div className="right">
