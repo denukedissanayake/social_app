@@ -24,7 +24,7 @@ const Post = ({post} : any) => {
         <div className='post'>
             <div className="user">
                 <div className="userinfo">
-                    <img src={post?.profileImage}/>
+                    <img src={post?.profilepic}/>
                     <div className="details">
                         <Link to={`/profile/${post?.id}`} style={{textDecoration: 'none', color: 'inherit' }}>
                             <span>{post?.name}</span>
@@ -35,8 +35,8 @@ const Post = ({post} : any) => {
                 <MoreHorizOutlinedIcon/>
             </div>
             <div className="content">
-                <p>{post?.post_desc}</p>
-                {post?.post_image && <img src={post?.post_image}/>}
+                <p>{post?.description}</p>
+                {post?.image && <img src={post?.image}/>}
             </div>
             <div className="reactions">
                 <div className="react" onClick={toggleLike}>

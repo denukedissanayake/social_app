@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./signup.scss";
 import { BASEURL } from "../../utils/urls";
 
@@ -12,7 +12,9 @@ const Signup = () => {
     name: undefined,
     password: undefined,
   });
+
   const [error, setError] = useState(undefined);
+  const navigate = useNavigate();
 
   const inputChangeHandler = (e : React.ChangeEvent<HTMLInputElement>) => {
     setInputs(prev => ({...prev, [e.target.name]: e.target.value}))
@@ -22,7 +24,8 @@ const Signup = () => {
     e.preventDefault();
 
     try{
-      await axios.post(`${BASEURL}/auth/register`, inputs);
+      const response = await axios.post(`${BASEURL}/auth/register`, inputs);
+      if(response.status === 200) navigate("/login");
     } catch(err : any) {
       setError(err.response.data);
     }

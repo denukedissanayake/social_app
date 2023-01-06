@@ -5,6 +5,8 @@ import {
   Outlet,
   RouterProvider,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from 'react-query'
+
 import "./App.scss";
 import Leftpannel from "./components/left-pannel/left-pannel";
 import Navbar from "./components/navbar/navbar";
@@ -20,19 +22,22 @@ const App = () => {
 
   const {darkmode} = useContext(DarkModeContext);
   const {currentUser} = useContext(AuthContext);
+  const queryClient = new QueryClient()
   
   const Layout = () => {
     return (
-      <div className={`theme-${darkmode === 'true' ? `dark` : `light`}`}>
-        <Navbar/>
-        <div style={{display: "flex"}}>
-          <Leftpannel/>
-          <div style={{flex:5}}>
-            <Outlet/>
+      <QueryClientProvider client={queryClient}>
+        <div className={`theme-${darkmode === 'true' ? `dark` : `light`}`}>
+          <Navbar/>
+          <div style={{display: "flex"}}>
+            <Leftpannel/>
+            <div style={{flex:5}}>
+              <Outlet/>
+            </div>
+            <Rightpannel/>
           </div>
-          <Rightpannel/>
         </div>
-      </div>
+      </QueryClientProvider>
     );
   }
   
