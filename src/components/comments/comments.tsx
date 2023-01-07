@@ -2,8 +2,11 @@ import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { Link } from 'react-router-dom';
 import "./comments.scss";
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from "../../utils/axios";
+import moment from "moment";
 
-const Comments = () => {
+const Comments = ({postid} : {postid : string}) => {
 
     const {currentUser} = useContext(AuthContext);
 
@@ -24,6 +27,12 @@ const Comments = () => {
         }
     ]
 
+    console.log(postid);
+
+    const { isLoading, error, data } = useQuery(["comments"], () =>
+        apiRequest.get("/comment/"+postid).then(res=> res?.data)
+    );
+
     return (
         <div className="comments">
             <div className="add-comment">
@@ -31,7 +40,8 @@ const Comments = () => {
                 <input type="text" placeholder="Write a Commet..."/>
                 <button>Send</button>
             </div>
-            {comments.map((comment) => (
+            {error && "Unexpected Error Occured. Please Refresh Again."}
+            {!error && (isLoading ? "Loading..." : data.map((comment : any) => (
                 <div className="comment">
                     <img src={comment.profileImage}/>
                     <div className="info">
@@ -40,9 +50,9 @@ const Comments = () => {
                         </Link>
                         <p>{comment.comment}</p>
                     </div>
-                    <span className="date">1 hour ago</span>
+                    <span className="date">{moment(comment.createdAt).fromNow()}</span>
                 </div>
-            ))}
+            )))}
         </div>
     )
 }

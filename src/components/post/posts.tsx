@@ -10,8 +10,6 @@ const Posts = () => {
     apiRequest.get("/post").then(res=> res?.data)
   );
 
-  console.log(data);
-
   return (
     <div className="posts">
       {error && "Something Went Wrong"}
