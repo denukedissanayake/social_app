@@ -7,6 +7,7 @@ import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useState } from 'react';
 import Comments from '../comments/comments';
+import moment from 'moment';
 
 const Post = ({post} : any) => {
     const [liked, setLiked] = useState(false);
@@ -29,7 +30,7 @@ const Post = ({post} : any) => {
                         <Link to={`/profile/${post?.id}`} style={{textDecoration: 'none', color: 'inherit' }}>
                             <span>{post?.name}</span>
                         </Link>
-                        <span className='date'>1 min Ago</span>
+                        <span className='date'>{moment(post?.createdAt).fromNow()}</span>
                     </div>
                 </div>
                 <MoreHorizOutlinedIcon/>

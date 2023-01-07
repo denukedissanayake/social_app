@@ -1,12 +1,12 @@
 import Post from "./post";
 import "./posts.scss";
 
-import { useQuery } from "react-query";
+import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from "../../utils/axios";
 
 const Posts = () => {
 
-  const { isLoading, error, data } = useQuery('posts', () =>
+  const { isLoading, error, data } = useQuery(["posts"], () =>
     apiRequest.get("/post").then(res=> res?.data)
   );
 

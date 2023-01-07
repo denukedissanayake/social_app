@@ -1,0 +1,99 @@
+@import "../../App.scss";
+
+.createpost{
+    @include themify($themes) {
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        margin: 20px 0px;
+        border-radius: 20px;
+        background-color: themed("background");
+        color: themed("text");
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
+        gap: 20px;
+
+        .top{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+
+            .left{
+
+                display: flex;
+                align-items: center;
+                flex: 5;
+
+                img{
+                    height: 50px;
+                    width: 50px;
+                    border-radius: 50%;
+                    margin-right: 20px;
+                    object-fit: cover;
+                }
+    
+                textarea{
+                    border: none;
+                    height: 100px;
+                    width: 100%;
+                    background-color: transparent;
+                    color: themed("text");
+                    border-radius: 5px;
+                    border-bottom: 1px solid themed("border");
+                    padding: 10px;
+                    resize: none;
+                }
+            }
+
+            .right{
+                display: flex;
+                flex: 1;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid black;
+                padding: 5px;
+                border-radius: 10px;
+
+                .uploadedimage{
+                    height: 100px;
+                    width: 100px;
+                }
+            }
+
+
+        }
+
+        .bottom{
+            display: flex;
+            justify-content: space-between;
+
+            .icons{
+                display: flex;
+                gap: 10px;
+
+                .icon{
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    cursor: pointer;
+
+                    img{
+                        height: 20px;
+                        width: 20px;
+                    }
+                }
+            }
+
+            button{
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                background-color: blue;
+                color: white;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        }
+    }
+
+}

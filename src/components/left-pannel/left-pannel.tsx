@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import "./left-pannel.scss";
 const calender = require("../../assets/leftpannel-images/calender.png");
 const course = require("../../assets/leftpannel-images/course.png");
@@ -16,13 +18,16 @@ const user = require("../../assets/leftpannel-images/user.png");
 
 
 const Leftpannel = () => {
+
+  const {currentUser} = useContext(AuthContext);
+
   return (
     <div className="left-pannel">
       <div className="container">
         <div className="menu">
           <div className="item">
-            <img src={user}/>
-            <span>John Doe</span>
+            <img src={currentUser?.profilepic}/>
+            <span>{currentUser?.name}</span>
           </div>
           <div className="item">
             <img src={friends}/>
