@@ -5,16 +5,35 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import Comments from '../comments/comments';
 import moment from 'moment';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '../../utils/axios';
+import { AuthContext } from '../../context/AuthContext';
 
 const Post = ({post} : any) => {
     const [liked, setLiked] = useState(false);
     const [commentBoxOpen, setCommentBoxOpen] = useState(false);
+    const {currentUser} = useContext(AuthContext);
+
+    const queryClient = useQueryClient();
+
+    const { isLoading, error, data } = useQuery(["likes", post.id], () =>
+        apiRequest.get(`/like/${post.id}`).then(res=> res?.data)
+    );
+
+    const likePostMutation = useMutation((liked :any) => {
+        if(liked) return apiRequest.delete('/like?postid='+post.id);
+        return apiRequest.post(`/like`, {postid: post.id});
+    }, {
+        onSuccess: () => {
+            queryClient.invalidateQueries(["likes"]);
+        },
+    });
 
     const toggleLike = () => {
-        setLiked(!liked);
+        likePostMutation.mutate(data?.includes(currentUser?.id));
     }
 
     const toggleCommentBox = () => {
@@ -41,8 +60,8 @@ const Post = ({post} : any) => {
             </div>
             <div className="reactions">
                 <div className="react" onClick={toggleLike}>
-                    {liked ? <FavoriteIcon/> : <FavoriteBorderOutlinedIcon/> }
-                    1 like
+                    {data?.includes(currentUser?.id) ? <FavoriteIcon style={{color: "red"}}/> : <FavoriteBorderOutlinedIcon/> }
+                    {data?.length}
                 </div>
                 <div className="react" onClick={toggleCommentBox}>
                     <CommentOutlinedIcon/>
