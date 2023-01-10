@@ -4,13 +4,12 @@ import "./posts.scss";
 import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from "../../utils/axios";
 
-const Posts = () => {
+
+const Posts = ({userid} : {userid? : string}) => {
 
   const { isLoading, error, data } = useQuery(["posts"], () =>
-    apiRequest.get("/post").then(res=> res?.data)
+    !userid ? apiRequest.get("/post").then(res=> res?.data) : apiRequest.get("/post?userid=" + userid).then(res=> res?.data)
   );
-
-  console.log(data);
 
   return (
     <div className="posts">

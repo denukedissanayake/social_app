@@ -11,57 +11,91 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import Posts from "../../components/post/posts";
+import { apiRequest } from "../../utils/axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 
 const Profile = () => {
 
   const {currentUser} = useContext(AuthContext);
+  const queryClient = useQueryClient();
+
+  const userId = useLocation().pathname.split("/")[2];
+
+  const { isLoading, error, data : userData } = useQuery(["user"], () =>
+    apiRequest.get(`/user/${userId}`).then(res=> res?.data)
+  );
+
+  const { data : followData } = useQuery(["follow"], () =>
+    apiRequest.get(`/follow?userid=${currentUser.id}`).then(res=> res?.data)
+  );
+
+  const folowUserMutation = useMutation((followed : any) => {
+    if(followed) return apiRequest.delete('/follow', {data: {followeruserid: currentUser.id, followeduserid: userId}});
+    return apiRequest.post('/follow', {followeruserid: currentUser.id, followeduserid: userId});
+  }, {
+      onSuccess: () => {
+          queryClient.invalidateQueries(["follow"]);
+      },
+  });
+
+  const followUser = () => {
+    folowUserMutation.mutate(followData?.includes(parseInt(userId)));
+  }
+
+  console.log(followData);
 
   return (
     <div className="profile">
-      <div className="images">
-        <img className="cover" src='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoHCBYWFRgVFRUZGBgZGRgYGhkYGRkYGRgZGBgaGhkYGBodIy4lHB4rHxgZJjgmKzAxNTU1GiQ7QDszPy40NTEBDAwMEA8QHxISHzYrJSw0NDQ0NDQ3PzQ2NDY0NDQ0OjQ0NDU0NDQ0NDQ0NDQ0NDQxNDQ0NDQ0NDQ0NDQ0NDQ0NP/AABEIAKgBLAMBIgACEQEDEQH/xAAbAAACAwEBAQAAAAAAAAAAAAADBAECBQAGB//EADgQAAEDAwMCBQIEBQUAAwEAAAEAAhEDITEEEkFRYQUicYGREzIUobHwBkLB0eEVUmKC8SOSohb/xAAZAQADAQEBAAAAAAAAAAAAAAABAgMABAX/xAAqEQACAgICAQMDBAMBAAAAAAAAAQIRAyESMUEEE1EiYXEUgZGhMrHw4f/aAAwDAQACEQMRAD8AT2q21E2LtqpyNxBtYjUqBK5jU3p8pZypaHjG3shmiNpWlpdCAD3V2hN0AuHLmk0dUMcUJ/6X0KKzwxoyJWmxiNtXLL1U+rKe3FeDJ/01k/amWaNo4CeDVMIPPORqigDaAVxRARQFIakcpfIbAGgCpbpwmA1WhB5ZdWAE2kEVrApCmVKTkw2TtQ6kKxchOK0Yu9hQtWAAMC6zKmnIvC1XhArUty9TBPhoTJHkjGeyEElaVXSnqkquicIIuu+OSL8nHLHJeABap+g6JRHUXibFM6Vx23HVaU6VoMYJupCDmHoqGitYtaeFB0w4QWX5C8PwZDqBQ3Uj0WuaB4/JVGmdaRkwj7ontGY3SmJVKlOASvQU/DTafeFar4Q0iLqPvxvbKrC60eSLpMYS7md16iv4CBgpCp4O4Lojng+mSlhkZVN5wntPTkY6ojPD4MmPRN/TAsBC0sifRowa7EzQnPC6tSkXTZYqubZBSYzijGeyFG5M1mEpfYV1wno5pw2NBdClgRIXnXR1UDa1HoqjQjNahKWhoxNKgU5SSOnKeprimjoQ4xyMECmjtXK0gtkgK8KAplCgWSArKoKmVnE1llBUSulZQDZKglDc8DlSHSm4M1klUcrEqhKdRCipUOapKq5ydWMDLVQtVnVOir9RWipV0LyRR7JVabIACu546qqZXRtEOYFzaSuGorGI8qA4oilRTbKC6kxMtC5sk2xOiBTVm0leVO5c9yDYrUYktTRstB7rpWs5dWNsYxq2mModWktOo1K1QuqMmTcUI/TVC1MvQnBVTJtCj2IH0R0TjgqQqKQjjYi1FAVAERgUGx0izGo7GKjAmmBSlIrGISkE9SWc2r2RvxQAz+S55KTK0ajHK+5eeq6l5O7cR0hMU/Ef9xussTEkbIqBSao6rKbqD1V21VT2yVj7tR0XfiClWuVgUeCNYxvPVdv7oBeuL0VE1hpUh8LNqeIQbD5UVPEwBYGeJxKosbfgXmjT+rGUKpqui8/X1r3GS4jsLBC/Fuv5sqsfT+RXmN2p4k1ubmOP7rqWqDxLfccj1Xmn1JU06zmmWmCq/p4pa7JrO730en3LiUlo9UHtv9wyP6hNB6hKLTo6YyTVosGK7GKaZCZZClJtDIhjUwxigQiscFzybGss0K4cqOKpuUmjUGLlDnoJchueiomotuQKxVmvQ6rleKoLBPKXqlEe5L1XK8RWBeUNyl5Q3FWRJlHKFVxU7kwBMPCIxVZTRmsU5RBGRZpAyudWn0VCxcGJOA/MM0qXKjbLnu6IcNje4qK1XWSNSqeEw9koDqatGCRKU7JpalzcG3ThNM8RE3aQO1/ySOxdsT8EyTmzX03iLXGLjpPKf3915oU0VrErxLwZTZtVdaB9tz+SSq6lxyUs1iu4JowSA5NlXVEJ1RWe1DhVihGyrnqhKsWqCxOhWVlcHK2xQGJ7FDaaqWuBH/vZbDNU0gXWKxiKGKU4qRWE3FG4yuE/QIK8wxzhyqu1LnWDjHqbrnlhvousx68vaLFzQehIlS+qwZcPmf0Xk6VNMMZwoSwJeSiyWb79c3gk+390u/WuOICSYCjMYk4RRRSGfxjuQERuoB7JcMU7EOCDYzuQXvVEJ70YxM2WeUCo5Uc8oZKqoiORRzkJzldwQn2F7eqrFEmyC5RvWfqNeAYaN3eYHsg/6g7/AGD5/wAKyxtknkSNbcFb6reoWepBTPGiSyDhrhVOoHdKroQ4I3NjBrjur/Wb1WO+u4vaGxE3ve3zITq3BM3JjDq47oTqw6IMLoW4G5lzV7BQKhVYUgI0Cy4eitqdkEBEaEGg2GFQrvqFUarAJTWTKnYFwCsGrWEoaSr9JHa0q4HZGwUK/TXCmnNikUluZqExTUmnynPpLvpIOQaM9wcfREo0059FWbThK5DJHU6aM1iEWlUcwqdWU5UMuqtbk+3Pwka+vebN8o7Z+eET6a76CaMYrsEpyYgalT/e/wD+zv7qWamq3D3e5n9U/wDh134ZPcfgnb+RR2tqn+f4Df7ILy85e4+5Wj+GU/hkVxXSA5SfbM6lvaZBPvcH1TjNUeWfBRhpldumWdPsKk10JVqrzgbfzKSfpCbkk+q3RplxoAIppdAdvs8+dEo/Br0X4ZR+GTcxeJ5Zup7/AJIrNQOYWIzxCSLAAzzfEgJ5hDhIMhNDLCfTJuLXZois3qFztQzrPsUjCh7JH9s+ydgQOvqS17SBaRkCScW+YnqtJuoByIWFqq7hHmB81gIwJgu5WpTkgTY8xMeyjGVyaKNaHmweVfYkAERs9U4o39NWDEuHnqflcZOSgxhnYFwjqPlLBqu1qRhGmsV2sSzWo7J4KDZgrWIopqgcVdrj1S2MWDFYU1ZjijshCzARSV200yGLyf8AEnixFQU2gFrHBxEkb3McCLjABBHqD0CSUuKsKPTCmrfSQvCvEWV2lzMjI6AlwHztT+1DlexhT6S76SbLV0LWEU+ku+inAAp2hGzCX0VIpJ36ajatYBUUlP0kd5DQScC6yG+OMNB9YCCC5oaYJJ/lPpcfBW5JAo0PpqRTU6Wu17GvaZDgDb0wi7gmTAC+mu2Lq9aASBJF46rL0fi/1DtDSDAmYzHr8Qs5paNRqFo5SHibmBocXkQ4fbN5PofXHCFqNYxph72g5ub/AL/uszXeJ05A3y3J2ifS/wC+UHNLyZJm+3UjaLcdT/W/yo/EHoPzXi6n8QBhAa7cJ6NaItYbccqjPHqmZzceXiAg80UbizzlBzmtE2mD+sG3oFahrS1rhMbgZjv/AFXaoAU920hwtAzE/wCSsqietuy5obtjOPg9XotZgONozc3n+ybc9rxZ2J+03svOUcNg9eOeP33TbtJqGmWbXDIAcLezoVIepcfpdV9zezJ7SI1dNxJduJuODMT3wvQaadoknAyZ4WE1ldwLXMfHYTfKIzxJ7GhppudYeaCQYAFjF1THljybBKElGmjcfUDRJIA6nurgrz2p8RNRoOywO60m4JF0zqfESWBrfK4mIJ4A4Kr+ojbJ8GbbHTdFCyfD/EGloBsGtH6x/ZM/6iw4cDGfSD/VF5oJW2bix8kCJOTA9URoWXqX79m18Q4EgGObSPlUPipa50mQftHSBB9ZN1L3432HizYFZuNw6Jhq8WPEZdYweoz3Mr0PhevbEPfERE4v1MWSLOnKnobjo2WpOr4oxj2NL27XNJkXvIAkjAz8LB8V8Sc5zhSJLS3ZIMZIJP5QsoUXlwMeUWyMdgcBLPMl0wqJ9COpYHhm4Sbnt0nooPiLRWFKMgy7gEY/r8LyOl8Qdui0tFuTAAAdfkAQndFqqf1RVqMEguIAknzQRcm8HrGUn6hN09DcT1Pimr+lSe+QHAENnl0WEc/4XzxtUvdvdLnu5zPQ+tvda38Q681j5WkM8sgwRLd0OHSzr/4WG2ZhwkDI7djwllkUnpm4tHp/4VeW1WhoO14O6Yvtm4FyIJHyV7eF4DQeLuYzYwbZ5kExultwOx/NabP4ne1sbGktyXE3k+UW5iJPK0c0Y6szR6mo8NBc4wACSTwBkqtCq17Q9hDmuEgjkLw/iX8QPqNLCWtaSAQ0RPSCZJvCU0/iz6Q+myo4Ng2t9zjaJEi8yj7y8GPo4Wd4vrCxjXMLTuey8/ylwBIgGRgH1XnNH4/UY0NDgQAPuE2I4PN5AB6LO1Oqc6N7jEmwdjk2jrIhTfqE+kw0es138SUqdMPBDnOiGA+Ydd0TACS038aUyHF7C2GggNO4uPIxA9V5VzJuwNgjE3jF82uPlRTo02mACS2PNJEziAD3Q/UMFGv4r/FP1qT2BhaHPEEX8rTMP6kx291lN1zAwsv5jYQOgn3wlq1faQAABHWd2P8A3hBY9m6Q08nPzbn0R5ye2Do9Tov4kYyiacbnHcZHlaAQL/Keb/FlJxAuJBPvaAOvPwvCPoAjdJaM8E5zHTKZp6NrSC8Oc0EyQCAAODz+kpvepdm7PUa3xtjpcwlwiJgtBkHnpfovMt8VeCQwkA/7Yt8YUamtbyAbQIthoMwSUro9O9xL8cbnYJx6oc+SbY2vA/VAJgnzWjki2LzHH5IJpgCAJMXk9ObyjU/DqgEkhszLicdR2xPsmtP4buG7eCOoBgH5yoLIo+Sixzk6SMeuGNyyLg3uM4An9/mh1NaJs0x++y16VBkwA+Zudtu8X/unPoU/936f0ELe8l2my2P0rn20jH0jAG7HzERmM/vp8oZpsY67A4ExMcf1xkJdoc7zAzyWyBI6n0nEJrUUXuAcGgtJ6xJHS/CZrjLvs5FdDGgeKc2BtYxLre3IlRT1LzMOLbRBG02Fogenyk2UXuO10gnANu/uFanparTJBIAjymY7wM+yWlbdqyqlKq+BzT6p21zSSXXjeLdvM793SxoPcQ5lUBw3Db7kk29R8I+nBPma0EA+YunJ6w2SbG+Lo9bw8SNpEfcCCDjMCATjiVlNRb8WVSlKKVXQpp9LUdJfJ9HfBkIjaZEjY9158zWvHtMEcpmu1rXWd9zQQHAm0RAaRyQevKtp6ZyWbSexa3pfqMfKX3NWykOC+lx38itanuYWNpnBgtaIuZ4t/wCrIGmqNN2x0kxMcfvqt97yxxBDBe5a4kgn/ib8cLg59QZaQLiC1x6c+mU8cjXxTNLFCTSvf2RkUqzwZcOb8YHI4wg6mo5xkiwWpU8Pe4yYJ95gdjAhC/0x9rR3IEdsSqxnC71ZGXpcrdJMzqQdIO0xBIMWgZv7LSY8hsmw2zcW9ODYGYSxp1xYMd28pOORawhMUNPXy5pAPLi32tMn0ylyNPba/kksc/h/wZ9TUQZbYe/5Tf5RqOqdNubA8zK1HeFNJl5LZHJcb2xLce6mn4YyNzA55HQ7c9BObH5SvNCuij9PkSujL09YhxeTi0See6u6uCZk8ei1HeBMd9r3MMyZaTngXHIOAeVX/wDnx/NULY6AO+cdEjzYm7saODI1pC9HVwAOLjrAPXrcKmo1+37ck5t2n9Tfsu1Xh2wS15fJ5bt69ykH6Z3THvKeMISdk5RlHTH2arc6d204tgibT8KKr3SIIievr78ys125mRdUNQxlVWJeCTYenWMk9XQeT+5VatY7i6R0Bj2x6ILRiO6kMJ7KlK7AMP1joF7f5kKPxBkTflczQvIna6PQp+j4Q4xPPHP7ykbhErGEpdIVo6k37j5jqOUzRqOcA0TIxHx+/VPUPDNpktkYtF/daraOzzSGNGA2+6L4AxfquXJlh4RfHgl5MBnhb3wS0gXucd/zCM/wWoy7QCTeJBP7H9Vt067nOgNfA/mgNa73uj6h7bN+2cxuuY7Y55UZeoyXSSo6Y+jhJbZjM0D2y54Ei4AdJM4iObR7oWoZUloa3aLk/BHFjIBwn9Xp2SHOeR5fKBAjMmb8jqo0jxH/AMYd6kmPk2OOP/MpNq+xY+iTlT0vzsW+qxjQfphpA3EgEAOIEGMERx6JepWNU7XYEHdEtuft7DHXC0NTV2xJ3E2EhxHuOTbGERp3kA4jsGwOw97YRTrdf2dD9DcqvXwYv03Ndc7iZ9CQLWb7ItZlQ+VsNaGgcNOOn8smU9V37mlmxrOXHPOBzwqVXXd5w0ddobmLXueVW7a6Hfo8dcXf+hFlWp9pfLerTzPE/dZVeYNgIN71L39kcvpsdLXA/JJvwPlG0oJEm98gdhnvMpnXwUXp8aitiGo8KLHAtc0Nc4AGDvJN4n25teVztZt3wDIZZwscEiY5knzfoma4c5kAmWuDhfBBhsjnH6LHqtBquBkTkA3BOfzmy0HzX1eDx8ycdrRpa3VhzLbg6wJwMAgOjMgc/KhlcB+7cbTECeIOeLcLIphzhMSC6JkbZAvPbuUd0kAC0SD7TIELPEkqRCWRylyfZ6A60sIBDg0zmDcR9sHGco51V2hzTtcYmQWutnzRBHovPNh2wh0gOaHAu5uS6AJgk+tls0dTTaCKhEOAaHNmQMgQfKPLOb+bsoTgl4s6oeqd96f9B9RqQANpBh4aQYw6xAk8xb1Q67AzztAHFybAyT1B/wAK+nozAYCQYEkAF22wBvEzGOvKu6kNpDhtNzus4gxFgfLw21/u6qakk68eSsM9ytr/AMMzU0GPcHbTcA+V+YHIieiYp1HMEMYw/wDYudmYgxGSiVtINoAcwvEFp2lgM3BLeRA+fRZbq9Vr9hZBbBMNB8sTMAXt+i6IuM1S3XhlnKClyS78pGy3xF4kGxyAGGABwIlc3XPM+UOEjDwMZgnNuFntfkhhkYlpmbAGJAFv+MWTZ3OlsFvRoeJi3BH5Zz0SSjFeC6yf8hpuqkw8tYTMAkXmY9vlNU2mZdFsXi1hlZdfTNIAO6RBDmv35ORJtgTYKNLqmNLpc8ObaSQ4mZNxHUHqpShyVxFeVp7NYOabyHdds9f+JvgrqlRrQSXGLSTMdsf3WLXcwS5mTexkSbA7Bg4HuVX8bU2y1rtoMGRAsC64JzcWzZb2W62L7qWn3/Jss1tMgS4Em2TObSL9EUPbzukdoxNsdisjS6p7nfYwON/NAPzzx0TbyCzzOBEkbWx5c/AuJHdJKHF/8wKTa+38DTqtIQNu7tFj69L/AKoZ0zKl9u11xdpsRaLWyMpVpaQYfEQRtaJnmfj+ybpVDgB98G0DFhIwEOUo9Ng4qXYm7wlgneWzABJNjN7AcIb/AANhktaL9x8gGQbBaFem4jdDntidrQ24yAZMznslXsc/LXMAFoIxgiD2v29lSOab3yFeGHVC58FZN5a0XsMj1Rho6DNvmIcRY7QCbZAN4jj19iUtM5xn6ztmQWt+7pcHpIsBCM/UMZtB3yeXYMZkxF8e4ReaT1bf4GWGCfVC1Q0nnazf5hNrxwILha8/CYo6amGbSHCP+R3XuHOwJgKafiLANzYPAIx6Dv8AuMKa2sP2lu7JFh5hIxmMBTub0rKxhG/DZZjaX2gCSSIJnPobe6jU61rIhzeQIAF+nWMXCzK+sqtdOwNi87IkGLyeZB/NUZqmPkvYLRFo3+kXPqE/tPuW0G0nUaT/AAOUNXv3OLDAsSCYn2H9USLQHBhvGQYge0zKC14eSwEtAm8BobBwBGTCXa9m/ZL5EyTYEmTfrYGyeMI7ooqVcn2FpaZgALjuM5gxJOB1m3yiVtVAB2OJ9A0CODGI6EdEvV8QY07YkAmb4jsfQ/krafXNuRu2wZO0kB0tgAm3IMdkafbsMsuKMdNL/ZR0mN7YF4JO0TYze945VNR4gWZgHaccDAz6/mrU3Pc9zdwG0/e7y3JMGCDe0x2VK3hb3t2h5BMkkiGggDJ6XOJ57J1KN06G91OL4O2Z1LV73AuP/ado7yMco9fRMe69Rzi7iLQBfF8/+Iuj8GY1xL3byJMH7BgXg+a/Hf5eqastB2Ms4kS3H25J5s02NrFPKSu4kYYpyV5N/uZf0qFJ8ul0YsQD0nkqP9Y22ZtDRgQFXW602gF0RBfcY/VP6fVtLZ63PlOUZW9tf2Bak1FpfsYtHWidwO0uzyBe/vjjk+6Ov1kvLwBJiYxPUTwrilaXAAZi/SYQ6bKdyWxcA36zefUD5XRGMU7PGnKUlxZSlW8kdSPSEWjWbBIyJz39f3dCfQva4k+yGW3juPzt+/VFxTIpNdmpoKRdua2YJ+6JjGBNytXW+ENcWlrxG1phweN02BwQLXknnCzfC6lQizhtBiC+P8xHFspupVfcua5xAmYkAATIMWELlycuWmGNVs0jQDR5Xu3C7iHANwMeWwkE2KOxm5gBhwjd99iGy7aSBwG//qPTzzNY6ZBggxzfERCcbrhsALgS2xxBBjiO+f8AioPHLVlYzimPMptjyi7RAHmcADYx79pWjqi/aYaXEAAbTLmxI9fa6zdFrCTtFiTIAEbpExN4mLD0Tmp1rwWjaQbucSQRBi4AF5v0+3ooy5OSVHZjzN9f0L6Wu4ulw2WE7gASIHAycH8kR9amAGugzMOZa3QRMJSpXY4BxG5xJBtAkSD5ZkGSMJp5G3zstwQ3ab/nkifyVJJa0dMW2uwDaDQZa5+BYQJdH8083Ht2V/oMfO7yzckuh1pgi0ex6hK72ESC4EOt5pBgwIJ4vEiFGo0G8CSWgYMGR2c0m+D09E6T8ugPapK/tZoUWUmSWEHPLibC4BJteMdVLtTTkeW5iT9xmbg3xY3jqsB2jq03Dadzf5XCJJPBai0GF5lwaJ3NgzbAmwn37ovEu+VixytfS41X8G080/u2l1pkFowZ6j2QnaumSWvYW2jgG8S47Y28c8KpptaRuE+UYYWxBE/lmT3KDrtJO7Y0EmTMlpIOQSREC+DwpqMb23+QylJbSX4HGVadtjnAtn7Y8xEnzEjzYCo7VNaQHWB4HmgkgiXR6LHbTrCd7TybXbJFjuHUdFZtMhkva7ZtuNpEXn0m03hVWKPySc5fBplhJ3U3ktBktJA3ZPlPa9vaEpV1upZJc2zRmOhHT156JWpqmWcXR/uAEH7YAFvz7I9LxVgAgXNgASSfcyIv0/Vb263V/sFSjbV1+BnRV9Q/zOhoIkFx2wYtAGLE8dCn9MA0ed7nAg+XaSDF4uFkajxJzd21zZaJnMjcJwcAmO0pnTVHOLhu6Oe90QHQYa3r/hJKDe6SRSOSK0m7+41VaxzhtBYejWyJ7wLAdVZ2gd/LDeZJdkwTt5zxxIVGbh5TWHBu0Qci15GO946ortS2Qd7SG/qW8geXtzhI3JaRW129Am+HPAJNTaCBGX7oJmYsOi41WU3BsOebzIDW2mQ3tbOEZvibWEl7yXCwhsNgmM3vzFkvqqTK+0tcQQPMREuF8j+qycr+pa+RlLh/jt/ku4ve07C2b88za+J/fdZ9fT12DbAeYvs4vdM6mm1jHNYd0RvtcSARB/6/EIR073+Zj2kPg7QYd0J6EbpTQddNV90c0s7nNr/RTSeEveDvhguS7LybWMG3CJqKbQ0ilvkOJcXGJMgEQSAMNj3TTCWxTDiHAEySSWzcQLWusx1F8PyGBx3mxJiSYBIJ4wspuUtvXhHNnyRX0peN2Graqpta1zRtB+51pLYMzmJJHorNruc6ajmgXcG2u0Wm0gTeRbjKx6leRtaHEHyjkkibx3lMMrvBa2zSQRtcO9plV9v4o58WaUZ34D6jxMAtYxszeIm5ECDz+aFpq7qjiAxznA327gRJv1gZ/qmqx2tc1sbvKCAyILgbsi/BCvqK5FIkN2OIEn+Z0Rtk+hOf6Lcl0kd79TNN76F2+GuqQIyYcSY6EkzBMfmjHXfShjCxwAzsyuZqt5uB5Q0jaCXOwTfqC2OUo7eXOLNrAXE7XNBIPMmeqH1SdM58+XlK1o7UNY5hNMkyDvD4iY3frKUfpAWwBGQYuZAi49p9ly5XhJoGNc+xQ6AifPY8RjNkehogTu3BwEggnaYiQY/yuXJ5TdGWKNpDNLQEOc37YcO5wJgn0PrCM5juSXAbiYN9ozuteOvdSuUHJthyY4xWhaixheNzjsk3bmLjoboNQ7XmCXTJBiLZB7LlyovJzpKjR0Ti6GizrYMEybx3v+5Wpq9zmtaWucZIEkHkiNxInm3ZcuXJkVZEXxxSejObqmMIc25EjhuJntafVXb4iRthpkt3AF1onEHOSFy5dDxpnVLI49DP4nyy0saXHMSDJIvHNuv8pQqlQxv3yRY2BkEgi2eYxwuXKXFL+RnJ/wBCTfEC1rnNIiZucCJjaZnmPZM6bxl22fLuMEzED5H68FcuXQsMHZyvNO0MU/GNwjcDcGGwIkEm8x7x0Vhq5u8xmDIAJgZE5Hxf45coTxxTpHVjk2m2QdazdYyQIOA3oZAxJP5rj4gyB5d4i8F8zE4BESDc9uZXLlvbQjyPf7g6WsogQ5rW52tgEWPTv/UIbNVRZADQ0XkgbYMG569Fy5P7S+ewe866Qv4jrW7Rua17ZDhHljltuJNrd+yUoa11R0NG1g2zA4wS4jsMm57qFyrCCUCPNyybHy5z2EMA8zhuIIEgCS4HOTH5d0caM7Bvc0Pm7v5txiAQ38jBUrlGbp0i6Vi2prbGw4Au7Eki465Jhpnt2SVOqSQG7gbzcAkmAZ5HS6hcnj/iTyt2N1XnbE+baCYM4x+RTXhlYOOyGtbtAHzjjkk+65coTS4s44yfuJ/c1fFdUxrXNptbO0hziBJE9Ri829V5uprWw2Gi3BMg2GRzhcuQ9PBUbLJt7EtLVaGtJ3TuJtgXiP31XOreYOztBEnk8AqFy7KVkWE+o8Q6SC/cMYi4M97quq1Bc1p6DzczeB6c/Klcgoqxi+lq2Li50tYQ2+AbCPlMfRcQDvGBnP6KVynk0wxP/9k='/>
-        <img className="profile" src={currentUser?.profileImage}/>
-      </div>
-      <div className="profileinfo">
-        <div className="infocontainer">
-          <div className="social">
-            <a href="#">
-              <FacebookIcon fontSize="large"/>
-            </a>
-            <a href="#">
-              <InstagramIcon fontSize="large"/>
-            </a>
-            <a href="#">
-              <TwitterIcon fontSize="large"/>
-            </a>
-            <a href="#">
-              <LinkedInIcon fontSize="large"/>
-            </a>
-            <a href="#">
-              <PinterestIcon fontSize="large"/>
-            </a>
-          </div>
-          <div className="info">
-            <span className="name">{currentUser?.name}</span>
-            <div className="items">
-              <div>
-                <LanguageIcon/>
-                <span>USA</span>
-              </div>
-              <div>
-                <LocationOnIcon/>
-                <span>social.com</span>
+      { isLoading? "Loading... Please Wait" : 
+      <>
+        <div className="images">
+          <img className="cover" src={userData?.coverpic}/>
+          <img className="profile" src={userData?.profilepic}/>
+        </div>
+        <div className="profileinfo">
+          <div className="infocontainer">
+            <div className="social">
+              <a href="#">
+                <FacebookIcon fontSize="large"/>
+              </a>
+              <a href="#">
+                <InstagramIcon fontSize="large"/>
+              </a>
+              <a href="#">
+                <TwitterIcon fontSize="large"/>
+              </a>
+              <a href="#">
+                <LinkedInIcon fontSize="large"/>
+              </a>
+              <a href="#">
+                <PinterestIcon fontSize="large"/>
+              </a>
+            </div>
+            <div className="info">
+              <span className="name">{userData?.name}</span>
+              <div className="items">
+                <div>
+                  <LanguageIcon/>
+                  <span>USA</span>
+                </div>
+                <div>
+                  <LocationOnIcon/>
+                  <span>social.com</span>
+                </div>
               </div>
             </div>
+            <div className="contact">
+              <EmailIcon fontSize="large" style={{cursor: "pointer"}}/>
+              <MoreVertIcon fontSize="large" style={{cursor: "pointer"}}/>
+            </div>
           </div>
-          <div className="contact">
-            <EmailIcon fontSize="large" style={{cursor: "pointer"}}/>
-            <MoreVertIcon fontSize="large" style={{cursor: "pointer"}}/>
-          </div>
+          {userId == currentUser.id ? 
+            <button>Update</button> : 
+            <button onClick={followUser}>{followData?.includes(parseInt(userId)) ? "Following" : "Follow"}</button>}
         </div>
-        <button>Follow</button>
-      </div>
-      <Posts/>
+        <Posts userid={userId}/>
+      </>}
     </div>
   )
 }
