@@ -8,17 +8,19 @@ import LanguageIcon from '@mui/icons-material/Language';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EmailIcon from '@mui/icons-material/Email';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import Posts from "../../components/post/posts";
 import { apiRequest } from "../../utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
+import Update from "../../components/update-user/update";
 
 const Profile = () => {
 
   const {currentUser} = useContext(AuthContext);
   const queryClient = useQueryClient();
+  const [update, setUpdate] =useState(false);
 
   const userId = useLocation().pathname.split("/")[2];
 
@@ -31,8 +33,8 @@ const Profile = () => {
   );
 
   const folowUserMutation = useMutation((followed : any) => {
-    if(followed) return apiRequest.delete('/follow', {data: {followeruserid: currentUser.id, followeduserid: userId}});
-    return apiRequest.post('/follow', {followeruserid: currentUser.id, followeduserid: userId});
+    if(followed) return apiRequest.delete('/follow', {data: {followeduserid: userId}});
+    return apiRequest.post('/follow', {followeduserid: userId});
   }, {
       onSuccess: () => {
           queryClient.invalidateQueries(["follow"]);
@@ -43,10 +45,9 @@ const Profile = () => {
     folowUserMutation.mutate(followData?.includes(parseInt(userId)));
   }
 
-  console.log(followData);
-
   return (
     <div className="profile">
+      {update && <Update setUpdate={setUpdate} update={update}/>}
       { isLoading? "Loading... Please Wait" : 
       <>
         <div className="images">
@@ -91,7 +92,7 @@ const Profile = () => {
             </div>
           </div>
           {userId == currentUser.id ? 
-            <button>Update</button> : 
+            <button onClick={() => setUpdate(true)}>Update</button> : 
             <button onClick={followUser}>{followData?.includes(parseInt(userId)) ? "Following" : "Follow"}</button>}
         </div>
         <Posts userid={userId}/>
