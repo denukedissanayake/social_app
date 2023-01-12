@@ -35,6 +35,17 @@
                     }
                 }
             }
+
+            .side-menu{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                .more-details{
+                    display: flex;
+                    cursor: pointer;
+                }
+            }
         }
 
         .content{

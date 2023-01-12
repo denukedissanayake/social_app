@@ -56,7 +56,7 @@ const Createpost = () => {
                     <span>Tag Friends</span>
                 </div>
             </div>
-            <button onClick={creatPost}>Post</button>
+            <button disabled={!description} onClick={creatPost}>Post</button>
         </div> 
     </div>
   )

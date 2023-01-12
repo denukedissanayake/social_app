@@ -1,0 +1,18 @@
+@import "../../App.scss";
+
+.menu{
+    @include themify($themes) {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        button{
+            border: none;
+            border-radius: 5px;
+            padding: 5px;
+            background-color: themed("text");
+            color: themed("background"); 
+            cursor: pointer;
+        }
+    }
+}

@@ -93,6 +93,11 @@
                 font-weight: bold;
                 cursor: pointer;
             }
+
+            button:disabled{
+                background-color: rgb(224, 224, 240);
+                cursor: not-allowed;
+            }
         }
     }
 

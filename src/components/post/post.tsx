@@ -11,10 +11,12 @@ import moment from 'moment';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../../utils/axios';
 import { AuthContext } from '../../context/AuthContext';
+import Menu from '../side-menu/menu';
 
 const Post = ({post} : any) => {
-    const [liked, setLiked] = useState(false);
     const [commentBoxOpen, setCommentBoxOpen] = useState(false);
+    const [menu, setMenu] = useState(false);
+
     const {currentUser} = useContext(AuthContext);
 
     const queryClient = useQueryClient();
@@ -40,6 +42,10 @@ const Post = ({post} : any) => {
         setCommentBoxOpen(!commentBoxOpen);
     }
 
+    const openmenu = () => {
+        setMenu(!menu);
+    }
+
     return (
         <div className='post'>
             <div className="user">
@@ -52,7 +58,10 @@ const Post = ({post} : any) => {
                         <span className='date'>{moment(post?.createdAt).fromNow()}</span>
                     </div>
                 </div>
-                <MoreHorizOutlinedIcon/>
+                <div className='side-menu'>
+                    <MoreHorizOutlinedIcon className='more-details' onClick={openmenu}/>
+                    {menu && <Menu post={post} user={currentUser}/>}
+                </div>
             </div>
             <div className="content">
                 <p>{post?.description}</p>
